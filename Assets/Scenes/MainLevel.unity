@@ -443,6 +443,7 @@ GameObject:
   - component: {fileID: 1187738201}
   - component: {fileID: 1187738200}
   - component: {fileID: 1187738203}
+  - component: {fileID: 1187738204}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -552,6 +553,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 5
+--- !u!114 &1187738204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1187738199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b61946d6692b645970e9a43363c859, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BombSpawner
+  bombPrefab: {fileID: 550854892682314582, guid: d85be1abccbac2c4baab838176971f0f, type: 3}
 --- !u!1 &1527355868
 GameObject:
   m_ObjectHideFlags: 0

@@ -31,8 +31,15 @@ public class PlayerMovement : MonoBehaviour
     {
         movementInput = controls.Player.Move.ReadValue<Vector2>();
 
-        // Prevent faster diagonal movement
-        movementInput = movementInput.normalized;
+        // Enforce 4-way movement (classic Bomberman style)
+        if (movementInput.x != 0f)
+        {
+            movementInput.y = 0f;
+        }
+        else if (movementInput.y != 0f)
+        {
+            movementInput.x = 0f;
+        }
     }
 
     private void FixedUpdate()
