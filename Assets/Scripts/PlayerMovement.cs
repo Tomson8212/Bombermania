@@ -6,9 +6,19 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private LayerMask obstacleLayer;
 
     private Rigidbody2D rb;
     private Vector2 movementInput;
+
+    private Vector2 primaryDirection;
+    private Vector2 secondaryDirection;
+    private Vector2 lastRawInput;
+
+    // (Gap Seeking)
+    private bool wasBlockedX;
+    private bool wasBlockedY;
+
     private PlayerControls controls;
 
     private void Awake()
@@ -17,29 +27,90 @@ public class PlayerMovement : MonoBehaviour
         controls = new PlayerControls();
     }
 
-    private void OnEnable()
-    {
-        controls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        controls.Disable();
-    }
+    private void OnEnable() => controls.Enable();
+    private void OnDisable() => controls.Disable();
 
     private void Update()
     {
-        movementInput = controls.Player.Move.ReadValue<Vector2>();
+        Vector2 rawInput = controls.Player.Move.ReadValue<Vector2>();
 
-        // Enforce 4-way movement (classic Bomberman style)
-        if (movementInput.x != 0f)
+        Vector2 input = new Vector2(
+            Mathf.Abs(rawInput.x) > 0.1f ? Mathf.Sign(rawInput.x) : 0,
+            Mathf.Abs(rawInput.y) > 0.1f ? Mathf.Sign(rawInput.y) : 0
+        );
+
+        Vector2 dirX = new Vector2(input.x, 0);
+        Vector2 dirY = new Vector2(0, input.y);
+
+        // Sprawdzamy radarem oba wciśnięte kierunki
+        bool isBlockedX = input.x != 0 && IsDirectionBlocked(dirX);
+        bool isBlockedY = input.y != 0 && IsDirectionBlocked(dirY);
+
+        // 1. GAP SEEKING - Priorytet dla luki, która właśnie się pojawiła
+        if (input.x != 0 && wasBlockedX && !isBlockedX)
         {
-            movementInput.y = 0f;
+            primaryDirection = dirX;
+            secondaryDirection = dirY;
         }
-        else if (movementInput.y != 0f)
+        
+        else if (input.y != 0 && wasBlockedY && !isBlockedY)
         {
-            movementInput.x = 0f;
+            primaryDirection = dirY;
+            secondaryDirection = dirX;
         }
+        // STANDARDOWY PRIORYTET (Ostatnio wciśnięty klawisz)
+        else if (input != lastRawInput)
+        {
+            if (input.x != 0 && lastRawInput.x == 0)
+            {
+                primaryDirection = dirX;
+                secondaryDirection = dirY;
+            }
+            else if (input.y != 0 && lastRawInput.y == 0)
+            {
+                primaryDirection = dirY;
+                secondaryDirection = dirX;
+            }
+            else if (input == Vector2.zero)
+            {
+                primaryDirection = Vector2.zero;
+                secondaryDirection = Vector2.zero;
+            }
+            else
+            {
+                if (input.x != 0) { primaryDirection = dirX; secondaryDirection = Vector2.zero; }
+                else if (input.y != 0) { primaryDirection = dirY; secondaryDirection = Vector2.zero; }
+            }
+        }
+
+        // Zapisujemy stany na następną klatkę
+        lastRawInput = input;
+        wasBlockedX = isBlockedX;
+        wasBlockedY = isBlockedY;
+
+        // LOGIKA RUCHU I ŚLIZGANIA
+        movementInput = primaryDirection;
+
+        if (primaryDirection != Vector2.zero && secondaryDirection != Vector2.zero)
+        {
+            if (IsDirectionBlocked(primaryDirection))
+            {
+                if (!IsDirectionBlocked(secondaryDirection))
+                {
+                    movementInput = secondaryDirection;
+                }
+                else
+                {
+                    movementInput = Vector2.zero; // Oba zablokowane
+                }
+            }
+        }
+    }
+
+    private bool IsDirectionBlocked(Vector2 direction)
+    {
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.15f, direction, 0.4f, obstacleLayer);
+        return hit.collider != null;
     }
 
     private void FixedUpdate()
