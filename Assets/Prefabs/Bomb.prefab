@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bomb
   fuseTime: 3
-  explosionRadius: 2
+  explosionRadius: 1
   explosionPrefab: {fileID: 8821818137619657399, guid: 96d532daf4e89f14fa01877bcc5e3d0e, type: 3}
   obstacleLayer:
     serializedVersion: 2

@@ -8,22 +8,18 @@ public class BombSpawner : MonoBehaviour
 
     private PlayerControls controls;
 
+    private PlayerStats playerStats;
+
     private void Awake()
     {
         controls = new PlayerControls();
-
         controls.Player.PlaceBomb.performed += context => SpawnBomb();
+
+        playerStats = GetComponent<PlayerStats>();
     }
 
-    private void OnEnable()
-    {
-        controls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        controls.Disable();
-    }
+    private void OnEnable() => controls.Enable();
+    private void OnDisable() => controls.Disable();
 
     private void SpawnBomb()
     {
@@ -31,12 +27,21 @@ public class BombSpawner : MonoBehaviour
 
         Vector2 playerPosition = transform.position;
 
-        // Ucina ułamek (np. 1.8 -> 1.0) i dodaje 0.5, celując w sam środek kafelka (1.5)
+        // Snapping do siatki
         float snappedX = Mathf.Floor(playerPosition.x) + 0.5f;
         float snappedY = Mathf.Floor(playerPosition.y) + 0.5f;
-
         Vector2 snapPosition = new Vector2(snappedX, snappedY);
 
-        Instantiate(bombPrefab, snapPosition, Quaternion.identity);
+        GameObject spawnedBomb = Instantiate(bombPrefab, snapPosition, Quaternion.identity);
+
+        
+        if (playerStats != null)
+        {
+            Bomb bombScript = spawnedBomb.GetComponent<Bomb>();
+            if (bombScript != null)
+            {
+                bombScript.SetRadius(playerStats.fireRadius);
+            }
+        }
     }
 }

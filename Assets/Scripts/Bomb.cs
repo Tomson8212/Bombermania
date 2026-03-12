@@ -4,13 +4,13 @@ public class Bomb : MonoBehaviour
 {
     [Header("Bomb Settings")]
     [SerializeField] private float fuseTime = 3f;
-    [SerializeField] private int explosionRadius = 2;
     [SerializeField] private GameObject explosionPrefab;
 
     [Header("Collision Settings")]
     // Warstwy, które zatrzymują ogień (Ściany i Skrzynki)
     [SerializeField] private LayerMask obstacleLayer;
 
+    private int explosionRadius = 1;
     private void Start()
     {
         Invoke(nameof(Explode), fuseTime);
@@ -58,5 +58,9 @@ public class Bomb : MonoBehaviour
             // Puste pole
             Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
         }
+    }
+    public void SetRadius(int newRadius)
+    {
+        explosionRadius = newRadius;
     }
 }
