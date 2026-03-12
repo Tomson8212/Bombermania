@@ -46,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
         bool isBlockedX = input.x != 0 && IsDirectionBlocked(dirX);
         bool isBlockedY = input.y != 0 && IsDirectionBlocked(dirY);
 
-        // 1. GAP SEEKING - Priorytet dla luki, która właśnie się pojawiła
+        // GAP SEEKING - Priorytet dla luki, która właśnie się pojawiła
         if (input.x != 0 && wasBlockedX && !isBlockedX)
         {
             primaryDirection = dirX;
