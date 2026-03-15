@@ -18,8 +18,12 @@ public class LevelGenerator : MonoBehaviour
     public GameObject cratePrefab;
 
     [Header("Hidden Items")]
-    public GameObject gatePrefab;           
-    public GameObject powerUpFirePrefab;    
+    public GameObject gatePrefab;
+    public GameObject powerUpFirePrefab;
+
+    [Header("Enemies")]
+    public GameObject enemyPrefab;          // Prefab fioletowego potwora
+    public int enemiesToSpawn = 3;          // Ilu wrogów ma być na planszy
 
     [Header("Level Setup")]
     public int cratesToSpawn = 20;
@@ -72,7 +76,6 @@ public class LevelGenerator : MonoBehaviour
 
         // 3. ROZSTAWIANIE SKRZYNEK
         int spawned = 0;
-
         List<Crate> spawnedCrates = new List<Crate>();
 
         while (spawned < cratesToSpawn && availableSpaces.Count > 0)
@@ -80,10 +83,7 @@ public class LevelGenerator : MonoBehaviour
             int randomIndex = Random.Range(0, availableSpaces.Count);
             Vector2 cratePos = availableSpaces[randomIndex];
 
-            // Przypisujemy postawioną skrzynkę do zmiennej
             GameObject newCrateObj = Instantiate(cratePrefab, cratePos, Quaternion.identity, transform);
-
-            // Pobieramy jej skrypt i dodajemy do naszej nowej listy
             Crate newCrateScript = newCrateObj.GetComponent<Crate>();
             spawnedCrates.Add(newCrateScript);
 
@@ -92,19 +92,41 @@ public class LevelGenerator : MonoBehaviour
         }
 
         // 4. UKRYWANIE SKARBÓW (Brama i Power-up)
-        // Upewniamy się, że mamy chociaż 2 skrzynki na mapie
         if (spawnedCrates.Count >= 2)
         {
-            // Losujemy pierwszą skrzynkę na Bramę
             int gateIndex = Random.Range(0, spawnedCrates.Count);
             spawnedCrates[gateIndex].hiddenItemPrefab = gatePrefab;
-
-            // Usuwamy tę skrzynkę z listy losowania, żeby Power-up nie trafił w to samo miejsce!
             spawnedCrates.RemoveAt(gateIndex);
 
-            // Losujemy drugą skrzynkę na Power-up
             int powerUpIndex = Random.Range(0, spawnedCrates.Count);
             spawnedCrates[powerUpIndex].hiddenItemPrefab = powerUpFirePrefab;
+        }
+
+        // 5. GENEROWANIE PRZECIWNIKÓW
+        // Filtrujemy dostępne miejsca, żeby potwory nie pojawiły się za blisko startu gracza
+        List<Vector2> safeEnemySpaces = new List<Vector2>();
+        Vector2 playerStartPos = new Vector2(1.5f, height - 1.5f); // Przybliżona pozycja startowa
+
+        foreach (Vector2 space in availableSpaces)
+        {
+            // Jeśli odległość płytki od gracza jest większa niż 3 kratki, uznajemy ją za bezpieczną
+            if (Vector2.Distance(playerStartPos, space) > 3f)
+            {
+                safeEnemySpaces.Add(space);
+            }
+        }
+
+        int spawnedEnemies = 0;
+        while (spawnedEnemies < enemiesToSpawn && safeEnemySpaces.Count > 0)
+        {
+            int randomIndex = Random.Range(0, safeEnemySpaces.Count);
+            Vector2 enemyPos = safeEnemySpaces[randomIndex];
+
+            // Tworzymy potwora na wylosowanej pozycji
+            Instantiate(enemyPrefab, enemyPos, Quaternion.identity, transform);
+
+            safeEnemySpaces.RemoveAt(randomIndex);
+            spawnedEnemies++;
         }
     }
 }

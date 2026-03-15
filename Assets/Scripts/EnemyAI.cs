@@ -17,6 +17,12 @@ public class EnemyAI : MonoBehaviour
 
     private void Start()
     {
+        
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterEnemy();
+        }
+
         rb = GetComponent<Rigidbody2D>();
         ChooseRandomDirection();
     }
@@ -84,7 +90,11 @@ public class EnemyAI : MonoBehaviour
 
     public void Die()
     {
-        Debug.Log("Potwór został usmażony!");
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.EnemyDefeated(transform.position);
+        }
+
         Destroy(gameObject);
     }
 

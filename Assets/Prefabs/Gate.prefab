@@ -101,6 +101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 773323209874152019}
   - component: {fileID: 4618035720939905878}
+  - component: {fileID: 4113779763470633540}
   m_Layer: 0
   m_Name: Gate
   m_TagString: Untagged
@@ -168,5 +169,18 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.3, y: 0.3}
   m_EdgeRadius: 0
+--- !u!114 &4113779763470633540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7210893610424080449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef99ede7a1d7d3244bfa095bde9801cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameScripts::Gate
+  openedGateSprite: {fileID: -2959947805814863945, guid: 263fcece52121994e9305ca725e11d9e, type: 3}

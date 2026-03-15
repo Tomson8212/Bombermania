@@ -1,0 +1,43 @@
+using UnityEngine;
+
+public class Gate : MonoBehaviour
+{
+    [Header("Sprites")]
+    public Sprite openedGateSprite;
+
+    private SpriteRenderer spriteRenderer;
+
+    private void Start()
+    {
+        // KLUCZOWA ZMIANA: Szukamy SpriteRenderera w obiektach podrzędnych (czyli w naszym Visuals)
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        if (GameManager.Instance != null && GameManager.Instance.hasKey)
+        {
+            OpenGate();
+        }
+    }
+
+    public void OpenGate()
+    {
+        if (spriteRenderer != null && openedGateSprite != null)
+        {
+            spriteRenderer.sprite = openedGateSprite;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            if (GameManager.Instance != null && GameManager.Instance.hasKey)
+            {
+                Debug.Log("POZIOM UKOŃCZONY! Gracz przeszedł przez otwartą bramę!");
+            }
+            else
+            {
+                Debug.Log("Brama jest zamknięta. Musisz najpierw znaleźć klucz!");
+            }
+        }
+    }
+}
