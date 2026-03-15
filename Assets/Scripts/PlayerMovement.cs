@@ -117,4 +117,10 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.linearVelocity = movementInput * moveSpeed;
     }
+    public void Die()
+    {
+        Debug.Log("Gracz nie żyje! GAME OVER");
+        
+        Destroy(gameObject);
+    }
 }

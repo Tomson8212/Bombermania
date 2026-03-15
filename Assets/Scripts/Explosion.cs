@@ -10,7 +10,7 @@ public class Explosion : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Sprawdzamy, czy to wróg
@@ -20,6 +20,15 @@ public class Explosion : MonoBehaviour
             if (enemy != null)
             {
                 enemy.Die();
+            }
+        }
+        // Sprawdzamy, czy to gracz
+        else if (other.CompareTag("Player"))
+        {
+            PlayerMovement player = other.GetComponent<PlayerMovement>();
+            if (player != null)
+            {
+                player.Die();
             }
         }
     }

@@ -9,9 +9,11 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Sensors")]
     public LayerMask obstacleLayer;
-
-    
     public float sensorLength = 0.55f;
+
+    [Header("Combat (Strefa Śmierci)")]
+    public LayerMask playerLayer; // Radar będzie szukał tylko tej warstwy
+    public float killRadius = 0.3f; // Rozmiar śmiertelnego jądra (możesz dopasować!)
 
     private void Start()
     {
@@ -21,13 +23,26 @@ public class EnemyAI : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // 1. Zawsze idziemy w aktualnym kierunku
+        // 1. RUCH
         rb.linearVelocity = currentDirection * speed;
 
-        // 2. Patrzymy przed siebie. Jeśli zbliżamy się do ściany, skręcamy!
+        // 2. SZUKANIE ŚCIAN
         if (IsDirectionBlocked(currentDirection, sensorLength))
         {
             ChooseRandomDirection();
+        }
+
+        // 3. NOWOŚĆ: SZUKANIE GRACZA (Matematyczny Hitbox)
+        // Rysujemy niewidzialne kółko na środku potwora. Jeśli dotknie warstwy Gracza...
+        Collider2D playerCollider = Physics2D.OverlapCircle(transform.position, killRadius, playerLayer);
+
+        if (playerCollider != null)
+        {
+            PlayerMovement player = playerCollider.GetComponent<PlayerMovement>();
+            if (player != null)
+            {
+                player.Die();
+            }
         }
     }
 
@@ -35,7 +50,6 @@ public class EnemyAI : MonoBehaviour
     {
         Vector2[] directions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
 
-        // Tasowanie kierunków
         for (int i = 0; i < directions.Length; i++)
         {
             Vector2 temp = directions[i];
@@ -44,7 +58,6 @@ public class EnemyAI : MonoBehaviour
             directions[randomIndex] = temp;
         }
 
-        // Sprawdzamy wylosowane kierunki nieco dłuższym laserem
         foreach (Vector2 dir in directions)
         {
             if (!IsDirectionBlocked(dir, 0.7f))
@@ -55,21 +68,17 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    
     private bool IsDirectionBlocked(Vector2 dir, float distance)
     {
-        
         RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, dir, distance, obstacleLayer);
 
         foreach (RaycastHit2D hit in hits)
         {
-            // IGNORE SELF: Ignorujemy zderzenie z samym sobą!
             if (hit.collider.gameObject != gameObject)
             {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -78,4 +87,5 @@ public class EnemyAI : MonoBehaviour
         Debug.Log("Potwór został usmażony!");
         Destroy(gameObject);
     }
+
 }
