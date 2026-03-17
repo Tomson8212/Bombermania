@@ -183,4 +183,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef99ede7a1d7d3244bfa095bde9801cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameScripts::Gate
-  openedGateSprite: {fileID: -2959947805814863945, guid: 263fcece52121994e9305ca725e11d9e, type: 3}
+  openedGateSprite: {fileID: 3305922784710880186, guid: 0a5970cf7f7d1fd429082494550dd9e0, type: 3}

@@ -109,8 +109,31 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsDirectionBlocked(Vector2 direction)
     {
-        RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.15f, direction, 0.4f, obstacleLayer);
-        return hit.collider != null;
+        // CircleCastAll zwraca listę wszystkiego, co uderzył nasz radar
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, 0.15f, direction, 0.4f, obstacleLayer);
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            // 1. Ignorujemy samego gracza (zabezpieczenie)
+            if (hit.collider.gameObject == gameObject) continue;
+
+            // 2. Jeśli uderzyliśmy w bombę, sprawdzamy, czy gracz wciąż na niej stoi
+            if (hit.collider.CompareTag("Bomb"))
+            {
+                Collider2D playerCollider = GetComponent<Collider2D>();
+
+                // Jeśli nasze granice wciąż się przecinają, ignorujemy tę bombę
+                if (playerCollider != null && hit.collider.bounds.Intersects(playerCollider.bounds))
+                {
+                    continue;
+                }
+            }
+
+            // Jeśli doszliśmy tutaj, trafiliśmy na prawdziwą, twardą przeszkodę (ścianę, skrzynkę lub zamkniętą bombę)
+            return true;
+        }
+
+        return false;
     }
 
     private void FixedUpdate()

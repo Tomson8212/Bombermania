@@ -75,9 +75,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   speed: 2
+  directionChangeInterval: 3
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 1728
   sensorLength: 0.55
   playerLayer:
     serializedVersion: 2
