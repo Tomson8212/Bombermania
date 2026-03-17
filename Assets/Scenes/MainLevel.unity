@@ -1122,8 +1122,8 @@ MonoBehaviour:
   gatePrefab: {fileID: 7210893610424080449, guid: 4d2e7fee0a1f0f8409d11ea1931e7da0, type: 3}
   powerUpFirePrefab: {fileID: 6335763416406092919, guid: 8ea744e7a9abe794abc94c84d53f318c, type: 3}
   enemyPrefab: {fileID: 4569405894446552970, guid: 5063a8b4870ab3f43bf7f4a060d3531b, type: 3}
-  enemiesToSpawn: 1
-  cratesToSpawn: 3
+  enemiesToSpawn: 10
+  cratesToSpawn: 20
 --- !u!4 &2133954613
 Transform:
   m_ObjectHideFlags: 0

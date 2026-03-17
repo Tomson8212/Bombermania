@@ -2,29 +2,26 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Wzorzec Singleton - pozwala innym skryptom łatwo "rozmawiać" z menedżerem
+    // Wzorzec Singleton
     public static GameManager Instance { get; private set; }
 
     [Header("Level Progress")]
     public int enemyCount = 0;
 
-    // NOWOŚĆ: Czy gracz ma już klucz?
     [Header("Player State")]
     public bool hasKey = false;
-
-    // Tu w przyszłości przypiszemy prefab Klucza
+    
     public GameObject keyPrefab;
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
     }
 
     // Funkcja wywoływana, gdy potwór się rodzi
@@ -50,8 +47,8 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Ostatni potwór pokonany! Pojawia się KLUCZ!");
 
-        // Zaokrąglamy w dół do pełnej liczby (np. 2.8 -> 2.0) i dodajemy 0.5, 
-        // żeby trafić idealnie w środek kafelka (wynik: 2.5)
+        // Zaokrąglamy w dół do pełnej liczby i dodajemy 0.5, 
+        // żeby trafić idealnie w środek kafelka
         float snapX = Mathf.Floor(spawnPosition.x) + 0.5f;
         float snapY = Mathf.Floor(spawnPosition.y) + 0.5f;
 

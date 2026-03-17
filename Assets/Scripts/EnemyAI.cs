@@ -1,101 +1,162 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
     [Header("Movement")]
-    public float speed = 2f;
-    public float directionChangeInterval = 3f; // NOWOŚĆ: Co ile sekund potwór sam z siebie skręca
-    private float timer; // NOWOŚĆ: Licznik czasu
+    [SerializeField] private float speed = 2f;
+    [SerializeField, Range(0f, 1f)] private float spontaneousTurnChance = 0.1f;
+
     private Vector2 currentDirection;
     private Rigidbody2D rb;
+    private Vector2Int lastDecisionTile = new Vector2Int(-9999, -9999);
 
     [Header("Sensors")]
-    public LayerMask obstacleLayer;
-    public float sensorLength = 0.55f;
+    [SerializeField] private LayerMask obstacleLayer;
+    [SerializeField] private float sensorLength = 0.6f;
 
-    [Header("Combat (Strefa Śmierci)")]
-    public LayerMask playerLayer;
-    public float killRadius = 0.3f;
+    [Header("Combat")]
+    [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private float killRadius = 0.3f;
+
+    private bool isDead = false;
 
     private void Start()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.RegisterEnemy();
-        }
+        if (GameManager.Instance != null) GameManager.Instance.RegisterEnemy();
 
         rb = GetComponent<Rigidbody2D>();
-        timer = directionChangeInterval; // Inicjalizacja licznika
-        ChooseRandomDirection();
-    }
-
-    private void Update()
-    {
-        // NOWOŚĆ: Odliczanie czasu do spontanicznej zmiany kierunku
-        timer -= Time.deltaTime;
-        if (timer <= 0)
-        {
-            ChooseRandomDirection();
-            timer = directionChangeInterval; // Reset licznika
-        }
+        currentDirection = GetRandomValidDirection(transform.position);
     }
 
     private void FixedUpdate()
     {
-        // 1. RUCH (Zwróć uwagę: w Unity 6 używamy linearVelocity)
+        if (isDead) return;
+
+        // 1. RUCH
         rb.linearVelocity = currentDirection * speed;
 
-        // 2. SZUKANIE PRZESZKÓD
-        if (IsDirectionBlocked(currentDirection, sensorLength))
-        {
-            ChooseRandomDirection();
-        }
-
-        // 3. SZUKANIE GRACZA (Zabijanie)
+        // 2. SZUKANIE GRACZA (Zabijanie)
         Collider2D playerCollider = Physics2D.OverlapCircle(transform.position, killRadius, playerLayer);
         if (playerCollider != null)
         {
             PlayerMovement player = playerCollider.GetComponent<PlayerMovement>();
-            if (player != null)
+            if (player != null) player.Die();
+        }
+
+        // 3. LOGIKA SIATKI I SKRZYŻOWAŃ
+        CheckIntersection();
+    }
+
+    private void CheckIntersection()
+    {
+        int tileX = Mathf.FloorToInt(transform.position.x);
+        int tileY = Mathf.FloorToInt(transform.position.y);
+        Vector2Int currentTile = new Vector2Int(tileX, tileY);
+        Vector2 tileCenter = new Vector2(tileX + 0.5f, tileY + 0.5f);
+
+        // Kiedy jest idealnie na środku kafelka
+        if (Vector2.Distance(transform.position, tileCenter) < 0.05f)
+        {
+            // Zabezpieczenie przed paraliżem. 
+            // Ignorujemy pamięć kafelka, jeśli potwór stoi w miejscu (jest zablokowany i czeka na otwarcie drogi).
+            if (currentTile == lastDecisionTile && currentDirection != Vector2.zero) return;
+
+            lastDecisionTile = currentTile;
+
+            // Ustawienie idealnie na środku osi
+            rb.position = tileCenter;
+
+            List<Vector2> availableDirections = GetAvailableDirections(tileCenter);
+
+            if (availableDirections.Count == 0)
             {
-                player.Die();
+                currentDirection = Vector2.zero; // Utknął w pułapce ze wszystkich stron
+                return;
+            }
+
+            bool canGoForward = availableDirections.Contains(currentDirection);
+
+            if (!canGoForward)
+            {
+                // MUSI SKRĘCIĆ LUB WYBRAĆ NOWY KIERUNEK Z POSTOJU
+                List<Vector2> options = new List<Vector2>(availableDirections);
+
+                if (options.Count > 1 && currentDirection != Vector2.zero)
+                {
+                    options.Remove(-currentDirection);
+                }
+
+                currentDirection = options[Random.Range(0, options.Count)];
+            }
+            else
+            {
+                // MOŻE IŚĆ PROSTO - Szansa na spontaniczny skręt w alejkę (10%)
+                if (Random.value <= spontaneousTurnChance)
+                {
+                    List<Vector2> sidePaths = new List<Vector2>();
+
+                    foreach (Vector2 dir in availableDirections)
+                    {
+                        if (dir != currentDirection && dir != -currentDirection)
+                        {
+                            sidePaths.Add(dir);
+                        }
+                    }
+
+                    if (sidePaths.Count > 0)
+                    {
+                        currentDirection = sidePaths[Random.Range(0, sidePaths.Count)];
+                    }
+                    else if (Random.value <= 0.1f) // 1% na losowe zawrócenie w ślepym korytarzu
+                    {
+                        currentDirection = -currentDirection;
+                    }
+                }
             }
         }
     }
 
-    private void ChooseRandomDirection()
+    // Inteligentne odbijanie od przeszkód (Ignoruje szorowanie po ścianach)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        Vector2[] directions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
+        if (currentDirection == Vector2.zero) return;
 
-        // Tasowanie tablicy
-        for (int i = 0; i < directions.Length; i++)
+        // Sprawdzamy kąt uderzenia
+        foreach (ContactPoint2D contact in collision.contacts)
         {
-            Vector2 temp = directions[i];
-            int randomIndex = Random.Range(i, directions.Length);
-            directions[i] = directions[randomIndex];
-            directions[randomIndex] = temp;
+            // Vector2.Dot sprawdza, pod jakim kątem potwór uderzył w przeszkodę.
+            // Wynik bliski -1 oznacza, że uderzył w nią centralnie z przodu.
+            if (Vector2.Dot(contact.normal, currentDirection) < -0.5f)
+            {
+                currentDirection = -currentDirection; // Odwrót
+                lastDecisionTile = new Vector2Int(-9999, -9999); // Reset pamięci, by podjął decyzję na najbliższej kratce
+                return; // Wystarczy, że wykryliśmy jedno czołowe zderzenie
+            }
         }
+    }
+
+    private List<Vector2> GetAvailableDirections(Vector2 checkPosition)
+    {
+        List<Vector2> validDirs = new List<Vector2>();
+        Vector2[] directions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right };
 
         foreach (Vector2 dir in directions)
         {
-            if (!IsDirectionBlocked(dir, 0.7f))
+            if (!IsDirectionBlocked(checkPosition, dir, sensorLength))
             {
-                currentDirection = dir;
-                return;
+                validDirs.Add(dir);
             }
         }
-
-        // Jeśli potwór jest otoczony z każdej strony (np. przez bomby) - zatrzymuje się
-        currentDirection = Vector2.zero;
+        return validDirs;
     }
 
-    private bool IsDirectionBlocked(Vector2 dir, float distance)
+    private bool IsDirectionBlocked(Vector2 startPos, Vector2 dir, float distance)
     {
-        RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, dir, distance, obstacleLayer);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(startPos, dir, distance, obstacleLayer);
 
         foreach (RaycastHit2D hit in hits)
         {
-            // Ignorujemy samych siebie oraz ignorujemy "triggery" (np. zasięg wybuchu)
             if (hit.collider.gameObject != gameObject && !hit.collider.isTrigger)
             {
                 return true;
@@ -104,12 +165,20 @@ public class EnemyAI : MonoBehaviour
         return false;
     }
 
+    private Vector2 GetRandomValidDirection(Vector2 position)
+    {
+        List<Vector2> available = GetAvailableDirections(position);
+        // Jeśli zrespił się w pułapce, bezpiecznie zwraca (0,0), zamiast na siłę przeć do góry
+        if (available.Count > 0) return available[Random.Range(0, available.Count)];
+        return Vector2.zero;
+    }
+
     public void Die()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.EnemyDefeated(transform.position);
-        }
+        if (isDead) return;
+        isDead = true;
+
+        if (GameManager.Instance != null) GameManager.Instance.EnemyDefeated(transform.position);
 
         Destroy(gameObject);
     }

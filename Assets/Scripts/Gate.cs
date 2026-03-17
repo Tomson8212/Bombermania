@@ -9,7 +9,6 @@ public class Gate : MonoBehaviour
 
     private void Start()
     {
-        // KLUCZOWA ZMIANA: Szukamy SpriteRenderera w obiektach podrzędnych (czyli w naszym Visuals)
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
         if (GameManager.Instance != null && GameManager.Instance.hasKey)

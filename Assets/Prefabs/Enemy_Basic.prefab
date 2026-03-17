@@ -74,8 +74,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f43d30b698e3624ca0f5887368fa311, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  speed: 2
-  directionChangeInterval: 3
+  speed: 1.5
+  spontaneousTurnChance: 0.1
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 1728
@@ -119,7 +119,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_Radius: 0.45
 --- !u!1 &7406234888590833554
 GameObject:
   m_ObjectHideFlags: 0
