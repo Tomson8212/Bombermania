@@ -524,6 +524,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BombSpawner
   bombPrefab: {fileID: 550854892682314582, guid: d85be1abccbac2c4baab838176971f0f, type: 3}
+  bombLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!58 &1187738205
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -573,6 +576,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
   fireRadius: 1
+  maxBombs: 1
 --- !u!1 &1527355868
 GameObject:
   m_ObjectHideFlags: 0
@@ -1120,10 +1124,12 @@ MonoBehaviour:
   solidWallTile: {fileID: 11400000, guid: f28a118b175b0ec4ab2a002afe83be50, type: 2}
   cratePrefab: {fileID: 458058324472142115, guid: 3c72f95404965c741af675cc64a048f1, type: 3}
   gatePrefab: {fileID: 7210893610424080449, guid: 4d2e7fee0a1f0f8409d11ea1931e7da0, type: 3}
-  powerUpFirePrefab: {fileID: 6335763416406092919, guid: 8ea744e7a9abe794abc94c84d53f318c, type: 3}
+  powerUpPrefabs:
+  - {fileID: 6335763416406092919, guid: 8ea744e7a9abe794abc94c84d53f318c, type: 3}
+  - {fileID: 6335763416406092919, guid: 7afbe628d281b2141839f97707f26095, type: 3}
   enemyPrefab: {fileID: 4569405894446552970, guid: 5063a8b4870ab3f43bf7f4a060d3531b, type: 3}
-  enemiesToSpawn: 10
-  cratesToSpawn: 20
+  enemiesToSpawn: 5
+  cratesToSpawn: 3
 --- !u!4 &2133954613
 Transform:
   m_ObjectHideFlags: 0

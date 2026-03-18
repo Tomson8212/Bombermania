@@ -10,7 +10,6 @@ public class LevelGeneratorTests
     public IEnumerator LevelGenerator_SpawnsCorrectNumberOfCrates()
     {
         // 1. ARRANGE
-        // Ładujemy główną scenę
         SceneManager.LoadScene(0);
 
         // Czekamy jedną klatkę, aż generator zbuduje planszę
@@ -22,6 +21,8 @@ public class LevelGeneratorTests
 
         // 3. ASSERT
         Assert.IsNotNull(generator, "Nie znaleziono LevelGeneratora na załadowanej scenie!");
-        Assert.AreEqual(generator.cratesToSpawn, spawnedCrates.Length, "Ilość wygenerowanych skrzynek na mapie nie zgadza się z limitem w LevelGeneratorze!");
+
+        
+        Assert.AreEqual(generator.CratesToSpawn, spawnedCrates.Length, "Ilość wygenerowanych skrzynek na mapie nie zgadza się z limitem w LevelGeneratorze!");
     }
 }

@@ -5,28 +5,31 @@ using UnityEngine.Tilemaps;
 public class LevelGenerator : MonoBehaviour
 {
     [Header("Grid Settings")]
-    public int width = 15;
-    public int height = 11;
+    [SerializeField] private int width = 15;
+    [SerializeField] private int height = 11;
 
     [Header("Static Environment (Tilemap)")]
-    public Tilemap floorTilemap;
-    public TileBase floorTile;
-    public Tilemap solidWallTilemap;
-    public TileBase solidWallTile;
+    [SerializeField] private Tilemap floorTilemap;
+    [SerializeField] private TileBase floorTile;
+    [SerializeField] private Tilemap solidWallTilemap;
+    [SerializeField] private TileBase solidWallTile;
 
     [Header("Dynamic Objects (Prefabs)")]
-    public GameObject cratePrefab;
+    [SerializeField] private GameObject cratePrefab;
 
     [Header("Hidden Items")]
-    public GameObject gatePrefab;
-    public GameObject powerUpFirePrefab;
+    [SerializeField] private GameObject gatePrefab;
+    // Tablica wszystkich dostępnych power-upów w grze
+    [SerializeField] private GameObject[] powerUpPrefabs;
 
     [Header("Enemies")]
-    public GameObject enemyPrefab;          // Prefab fioletowego potwora
-    public int enemiesToSpawn = 3;          // Ilu wrogów ma być na planszy
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private int enemiesToSpawn = 3;
 
     [Header("Level Setup")]
-    public int cratesToSpawn = 20;
+    [SerializeField] private int cratesToSpawn = 20;
+
+    public int CratesToSpawn => cratesToSpawn;
 
     private void Start()
     {
@@ -61,7 +64,6 @@ public class LevelGenerator : MonoBehaviour
                 }
                 else
                 {
-                    // L-Shape w lewym GÓRNYM rogu (Baza Gracza)
                     if ((x == 1 && y == height - 2) ||
                         (x == 1 && y == height - 3) ||
                         (x == 2 && y == height - 2))
@@ -91,25 +93,34 @@ public class LevelGenerator : MonoBehaviour
             spawned++;
         }
 
-        // 4. UKRYWANIE SKARBÓW (Brama i Power-up)
+        // 4. UKRYWANIE SKARBÓW (Brama i losowy Power-up)
         if (spawnedCrates.Count >= 2)
         {
+            // Chowamy bramę
             int gateIndex = Random.Range(0, spawnedCrates.Count);
             spawnedCrates[gateIndex].hiddenItemPrefab = gatePrefab;
-            spawnedCrates.RemoveAt(gateIndex);
+            spawnedCrates.RemoveAt(gateIndex); // Usuwamy tę skrzynkę z puli dostępnych
 
-            int powerUpIndex = Random.Range(0, spawnedCrates.Count);
-            spawnedCrates[powerUpIndex].hiddenItemPrefab = powerUpFirePrefab;
+            // Losujemy jeden power-up z naszej tablicy
+            GameObject selectedPowerUp = null;
+            if (powerUpPrefabs != null && powerUpPrefabs.Length > 0)
+            {
+                int randomPowerUpIndex = Random.Range(0, powerUpPrefabs.Length);
+                selectedPowerUp = powerUpPrefabs[randomPowerUpIndex];
+            }
+
+            // Chowamy wylosowany power-up pod inną skrzynką
+            int crateForPowerUpIndex = Random.Range(0, spawnedCrates.Count);
+            spawnedCrates[crateForPowerUpIndex].hiddenItemPrefab = selectedPowerUp;
+            spawnedCrates.RemoveAt(crateForPowerUpIndex);
         }
 
         // 5. GENEROWANIE PRZECIWNIKÓW
-        // Filtrujemy dostępne miejsca, żeby potwory nie pojawiły się za blisko startu gracza
         List<Vector2> safeEnemySpaces = new List<Vector2>();
-        Vector2 playerStartPos = new Vector2(1.5f, height - 1.5f); // Przybliżona pozycja startowa
+        Vector2 playerStartPos = new Vector2(1.5f, height - 1.5f);
 
         foreach (Vector2 space in availableSpaces)
         {
-            // Jeśli odległość płytki od gracza jest większa niż 3 kratki, uznajemy ją za bezpieczną
             if (Vector2.Distance(playerStartPos, space) > 3f)
             {
                 safeEnemySpaces.Add(space);
@@ -122,7 +133,6 @@ public class LevelGenerator : MonoBehaviour
             int randomIndex = Random.Range(0, safeEnemySpaces.Count);
             Vector2 enemyPos = safeEnemySpaces[randomIndex];
 
-            // Tworzymy potwora na wylosowanej pozycji
             Instantiate(enemyPrefab, enemyPos, Quaternion.identity, transform);
 
             safeEnemySpaces.RemoveAt(randomIndex);

@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1318502557779142857, guid: d1a87738a65a8544b849179fd94a976e, type: 3}
+  m_Sprite: {fileID: -5519254911157023079, guid: ee729440e02d18a4189e3d114de5bc3b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 2989715683961627807}
   - component: {fileID: 8734309961426547653}
   m_Layer: 0
-  m_Name: PowerUp_Fire
+  m_Name: PowerUp_ExtraBomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -183,3 +183,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf722a29b7f48bc4d82c524525f79153, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PowerUp
+  type: 1

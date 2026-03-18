@@ -11,9 +11,16 @@ public class Bomb : MonoBehaviour
 
     private int explosionRadius = 1;
 
-    // NOWOŚĆ: Referencje do ignorowania kolizji
+    // Referencje do ignorowania kolizji
     private Collider2D bombCollider;
     private Collider2D playerCollider;
+
+    private BombSpawner mySpawner;
+
+    public void SetSpawner(BombSpawner spawner)
+    {
+        mySpawner = spawner;
+    }
 
     private void Start()
     {
@@ -27,7 +34,7 @@ public class Bomb : MonoBehaviour
         {
             playerCollider = player.GetComponent<Collider2D>();
 
-            // Mówimy fizyce Unity: "Zignoruj to, że te dwa obiekty się przenikają!"
+            // Zignoruj to, że te dwa obiekty się przenikają
             if (bombCollider != null && playerCollider != null)
             {
                 Physics2D.IgnoreCollision(bombCollider, playerCollider, true);
@@ -42,9 +49,9 @@ public class Bomb : MonoBehaviour
         {
             if (!bombCollider.bounds.Intersects(playerCollider.bounds))
             {
-                // Gracz z niej zszedł! Włączamy twardą kolizję, żeby zablokować powrót.
+                // Włączamy kolizję obiektów kiedy gracz zejdzie z bomby która postawił
                 Physics2D.IgnoreCollision(bombCollider, playerCollider, false);
-                playerCollider = null; // Przestajemy to sprawdzać, bo zrobiliśmy swoje
+                playerCollider = null; // Przestajemy to sprawdzać
             }
         }
     }
@@ -61,6 +68,11 @@ public class Bomb : MonoBehaviour
             SpawnExplosionInDirection(Vector2.right);
         }
 
+        // Zgłaszamy spawnerowi, że znikamy z planszy
+        if (mySpawner != null)
+        {
+            mySpawner.OnBombExploded();
+        }
         Destroy(gameObject);
     }
 
