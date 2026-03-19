@@ -14,8 +14,10 @@ public class Bomb : MonoBehaviour
     // Referencje do ignorowania kolizji
     private Collider2D bombCollider;
     private Collider2D playerCollider;
-
     private BombSpawner mySpawner;
+
+    // NOWOŚĆ: Flaga zabezpieczająca przed nieskończoną pętlą wybuchów!
+    private bool isExploding = false;
 
     public void SetSpawner(BombSpawner spawner)
     {
@@ -34,7 +36,6 @@ public class Bomb : MonoBehaviour
         {
             playerCollider = player.GetComponent<Collider2D>();
 
-            // Zignoruj to, że te dwa obiekty się przenikają
             if (bombCollider != null && playerCollider != null)
             {
                 Physics2D.IgnoreCollision(bombCollider, playerCollider, true);
@@ -44,35 +45,50 @@ public class Bomb : MonoBehaviour
 
     private void Update()
     {
-        // Co klatkę sprawdzamy, czy gracz wciąż dotyka bomby
         if (playerCollider != null && bombCollider != null)
         {
             if (!bombCollider.bounds.Intersects(playerCollider.bounds))
             {
-                // Włączamy kolizję obiektów kiedy gracz zejdzie z bomby która postawił
                 Physics2D.IgnoreCollision(bombCollider, playerCollider, false);
-                playerCollider = null; // Przestajemy to sprawdzać
+                playerCollider = null;
             }
+        }
+    }
+
+    // NOWOŚĆ: Funkcja wywoływana, gdy innna bomba "dotknie" nas swoim ogniem
+    public void ForceExplode()
+    {
+        if (!isExploding)
+        {
+            CancelInvoke(nameof(Explode)); // Anulujemy standardowe odliczanie
+            Explode(); // Odpalamy bombę natychmiast!
         }
     }
 
     private void Explode()
     {
+        // Jeśli bomba już zaczęła wybuchać w tej klatce (np. przez łańcuch), przerywamy!
+        if (isExploding) return;
+
+        isExploding = true; // Blokujemy możliwość ponownego odpalenia
+
         if (explosionPrefab != null)
         {
+            // Ogień na środku (w miejscu samej bomby)
             Instantiate(explosionPrefab, transform.position, Quaternion.identity);
 
+            // Ogień rozchodzący się na boki
             SpawnExplosionInDirection(Vector2.up);
             SpawnExplosionInDirection(Vector2.down);
             SpawnExplosionInDirection(Vector2.left);
             SpawnExplosionInDirection(Vector2.right);
         }
 
-        // Zgłaszamy spawnerowi, że znikamy z planszy
         if (mySpawner != null)
         {
             mySpawner.OnBombExploded();
         }
+
         Destroy(gameObject);
     }
 
@@ -81,19 +97,33 @@ public class Bomb : MonoBehaviour
         for (int i = 1; i <= explosionRadius; i++)
         {
             Vector2 spawnPosition = (Vector2)transform.position + (direction * i);
+
+            // Skanujemy kratkę przed nami
             Collider2D hit = Physics2D.OverlapBox(spawnPosition, new Vector2(0.5f, 0.5f), 0f, obstacleLayer);
 
             if (hit != null)
             {
+                // 1. Sprawdzamy, czy uderzyliśmy w skrzynkę
                 Crate crate = hit.GetComponent<Crate>();
                 if (crate != null)
                 {
                     crate.DestroyCrate();
                     Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
                 }
+
+                // 2. NOWOŚĆ: Sprawdzamy, czy na naszej drodze stoi INNA BOMBA!
+                Bomb otherBomb = hit.GetComponent<Bomb>();
+                if (otherBomb != null)
+                {
+                    // Odpalamy sąsiednią bombę natychmiast!
+                    otherBomb.ForceExplode();
+                }
+
+                // Przerywamy pętlę - wybuch nie idzie dalej za przeszkodę (ścianę/skrzynkę/bombę)
                 break;
             }
 
+            // Jeśli droga jest wolna, stawiamy zwykły płomień
             Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
         }
     }

@@ -1128,7 +1128,7 @@ MonoBehaviour:
   - {fileID: 6335763416406092919, guid: 8ea744e7a9abe794abc94c84d53f318c, type: 3}
   - {fileID: 6335763416406092919, guid: 7afbe628d281b2141839f97707f26095, type: 3}
   enemyPrefab: {fileID: 4569405894446552970, guid: 5063a8b4870ab3f43bf7f4a060d3531b, type: 3}
-  enemiesToSpawn: 5
+  enemiesToSpawn: 1
   cratesToSpawn: 3
 --- !u!4 &2133954613
 Transform:

@@ -50,7 +50,7 @@ MonoBehaviour:
   explosionPrefab: {fileID: 8821818137619657399, guid: 96d532daf4e89f14fa01877bcc5e3d0e, type: 3}
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 1216
 --- !u!58 &3706675838442624043
 CircleCollider2D:
   m_ObjectHideFlags: 0
