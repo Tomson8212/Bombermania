@@ -16,19 +16,25 @@ public class Bomb : MonoBehaviour
     private Collider2D playerCollider;
     private BombSpawner mySpawner;
 
-    // NOWOŚĆ: Flaga zabezpieczająca przed nieskończoną pętlą wybuchów!
+    // Flaga zabezpieczająca przed nieskończoną pętlą wybuchów
     private bool isExploding = false;
-
-    public void SetSpawner(BombSpawner spawner)
+    
+    private bool isDetonatorControlled = false;
+    public void InitializeBomb(BombSpawner spawner, int radius, bool detonatorActive)
     {
         mySpawner = spawner;
+        explosionRadius = radius;
+        isDetonatorControlled = detonatorActive;
+
+        // Jeśli gracz NIE ma detonatora, włączamy stary zapalnik czasowy
+        if (!isDetonatorControlled)
+        {
+            Invoke(nameof(Explode), fuseTime);
+        }
     }
 
     private void Start()
     {
-        Invoke(nameof(Explode), fuseTime);
-
-        // Znajdujemy kolidery
         bombCollider = GetComponent<Collider2D>();
         GameObject player = GameObject.FindGameObjectWithTag("Player");
 
@@ -55,19 +61,19 @@ public class Bomb : MonoBehaviour
         }
     }
 
-    // NOWOŚĆ: Funkcja wywoływana, gdy innna bomba "dotknie" nas swoim ogniem
+    // Funkcja wywoływana, gdy innna bomba "dotknie" nas swoim ogniem
     public void ForceExplode()
     {
         if (!isExploding)
         {
             CancelInvoke(nameof(Explode)); // Anulujemy standardowe odliczanie
-            Explode(); // Odpalamy bombę natychmiast!
+            Explode(); // Odpalamy bombę natychmiast
         }
     }
 
     private void Explode()
     {
-        // Jeśli bomba już zaczęła wybuchać w tej klatce (np. przez łańcuch), przerywamy!
+        // Jeśli bomba już zaczęła wybuchać w tej klatce, przerywamy
         if (isExploding) return;
 
         isExploding = true; // Blokujemy możliwość ponownego odpalenia
@@ -111,7 +117,7 @@ public class Bomb : MonoBehaviour
                     Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
                 }
 
-                // 2. NOWOŚĆ: Sprawdzamy, czy na naszej drodze stoi INNA BOMBA!
+                // 2. Sprawdzamy, czy na naszej drodze stoi INNA BOMBA!
                 Bomb otherBomb = hit.GetComponent<Bomb>();
                 if (otherBomb != null)
                 {

@@ -7,6 +7,7 @@ public class PowerUp : MonoBehaviour
     {
         FireRange,
         ExtraBomb,
+        Detonator,
         SpeedMove // na przyszłość
     }
 
@@ -30,6 +31,10 @@ public class PowerUp : MonoBehaviour
 
                     case PowerUpType.ExtraBomb:
                         stats.IncreaseMaxBombs();
+                        break;
+                    
+                    case PowerUpType.Detonator:
+                        stats.EnableDetonator();
                         break;
                 }
 

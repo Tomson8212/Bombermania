@@ -575,8 +575,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f01e040a1ccbccd4bab09237ddacbd17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
-  fireRadius: 1
-  maxBombs: 1
+  fireRadius: 2
+  maxBombs: 3
+  hasDetonator: 0
 --- !u!1 &1527355868
 GameObject:
   m_ObjectHideFlags: 0
@@ -1127,6 +1128,7 @@ MonoBehaviour:
   powerUpPrefabs:
   - {fileID: 6335763416406092919, guid: 8ea744e7a9abe794abc94c84d53f318c, type: 3}
   - {fileID: 6335763416406092919, guid: 7afbe628d281b2141839f97707f26095, type: 3}
+  - {fileID: 6335763416406092919, guid: 801e7eb833fea6f4dbe9329e04c51855, type: 3}
   enemyPrefab: {fileID: 4569405894446552970, guid: 5063a8b4870ab3f43bf7f4a060d3531b, type: 3}
   enemiesToSpawn: 1
   cratesToSpawn: 3
